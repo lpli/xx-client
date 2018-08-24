@@ -2,6 +2,10 @@ package com.xx.core.dto;
 
 import java.io.Serializable;
 
+import com.xx.util.Crc8Util;
+
+import io.netty.util.CharsetUtil;
+
 /**
  * 消息结构
  * @author lee
@@ -25,7 +29,7 @@ public class Message implements Serializable{
 	 * 默认一个字节，2^8 = 256-1=255 
 	 * 当消息长度超过255字节时，使用secStart 的低三位 作为长度L的高位拓展
 	 */
-	private int length;
+	private byte length;
 	
 	/**
 	 * 长度一个字节
@@ -55,7 +59,7 @@ public class Message implements Serializable{
 	/**
 	 * 用户数据
 	 */
-	private String payload;
+	private byte[] payload;
 	
 	/**
 	 * 帧crc校验值
@@ -71,12 +75,15 @@ public class Message implements Serializable{
 	public byte getStart() {
 		return start;
 	}
-	public int getLength() {
+
+	public byte getLength() {
 		return length;
 	}
-	public void setLength(int length) {
+
+	public void setLength(byte length) {
 		this.length = length;
 	}
+
 	public byte getSecStart() {
 		return secStart;
 	}
@@ -101,10 +108,11 @@ public class Message implements Serializable{
 	public void setAddress(Address address) {
 		this.address = address;
 	}
-	public String getPayload() {
+	
+	public byte[] getPayload() {
 		return payload;
 	}
-	public void setPayload(String payload) {
+	public void setPayload(byte[] payload) {
 		this.payload = payload;
 	}
 	public byte getCrc() {
@@ -132,12 +140,26 @@ public class Message implements Serializable{
 		builder.append(", address=");
 		builder.append(address);
 		builder.append(", payload=");
-		builder.append(payload);
+		builder.append(new String(payload,CharsetUtil.UTF_8));
 		builder.append(", crc=");
 		builder.append(crc);
 		builder.append(", end=");
 		builder.append(end);
 		builder.append("]");
+		return builder.toString();
+	}
+	
+	public String toHexString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("Message=");
+		builder.append(Crc8Util.byte2HexString(start));
+		builder.append(Crc8Util.byte2HexString(length));
+		builder.append(Crc8Util.byte2HexString(secStart));
+		builder.append(Crc8Util.byte2HexString(control));
+		builder.append(address.toHexString());
+		builder.append(Crc8Util.byte2HexString(payload));
+		builder.append(Crc8Util.byte2HexString(crc));
+		builder.append(Crc8Util.byte2HexString(end));
 		return builder.toString();
 	}
 	

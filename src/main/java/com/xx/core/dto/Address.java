@@ -3,6 +3,8 @@ package com.xx.core.dto;
 import java.io.Serializable;
 import java.util.Arrays;
 
+import com.xx.util.Crc8Util;
+
 /**
  * 地址控制
  * 
@@ -29,12 +31,12 @@ public class Address implements Serializable {
 	/**
 	 * 生产日期-月 0x0000 占半个字节低位
 	 */
-	private int month;
+	private byte month;
 
 	/**
 	 * 生产日期-年 占一个字节
 	 */
-	private int year;
+	private byte year;
 
 	/**
 	 * 测站地址 长度两个字节
@@ -57,19 +59,21 @@ public class Address implements Serializable {
 		this.productPwd = productPwd;
 	}
 
-	public int getMonth() {
+
+
+	public byte getMonth() {
 		return month;
 	}
 
-	public void setMonth(int month) {
+	public void setMonth(byte month) {
 		this.month = month;
 	}
 
-	public int getYear() {
+	public byte getYear() {
 		return year;
 	}
 
-	public void setYear(int year) {
+	public void setYear(byte year) {
 		this.year = year;
 	}
 
@@ -95,7 +99,7 @@ public class Address implements Serializable {
 		if (bytes.length == 5) {
 			this.productNo = bytes[0];
 			this.productPwd = (byte) (bytes[1] & 0xf0);
-			this.month = bytes[1] & 0x0f;
+			this.month = (byte) (bytes[1] & 0x0f);
 			this.year = bytes[2];
 			this.station = new byte[] { bytes[3], bytes[4] };
 		}
@@ -118,6 +122,12 @@ public class Address implements Serializable {
 		return builder.toString();
 	}
 
+	
+	public String toHexString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append(Crc8Util.byte2HexString(getBytes()));
+		return builder.toString();
+	}
 	
 	
 	

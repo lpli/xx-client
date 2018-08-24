@@ -3,15 +3,12 @@
  */
 package com.xx.core.encoder;
 
-import java.nio.charset.Charset;
-
 import com.xx.core.dto.Address;
 import com.xx.core.dto.Message;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
-import io.netty.util.CharsetUtil;
 
 /**
  * @author lee
@@ -31,7 +28,7 @@ public class MessageEncoder extends MessageToByteEncoder<Message>{
 		}
 		Address address = msg.getAddress();
 		out.writeBytes(address.getBytes());
-		out.writeBytes(msg.getPayload().getBytes(CharsetUtil.UTF_8));
+		out.writeBytes(msg.getPayload());
 		out.writeByte(msg.getCrc());
 		out.writeByte(msg.getEnd());
 		ctx.flush();

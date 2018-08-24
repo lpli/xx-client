@@ -26,6 +26,9 @@ public class MessageDecoder extends ByteToMessageDecoder {
 
 	@Override
 	protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
+		if(in.readableBytes() < 11) {
+			return;
+		}
 		Message message = new Message();
 		in.readByte();
 		byte len = in.readByte();
@@ -44,7 +47,7 @@ public class MessageDecoder extends ByteToMessageDecoder {
 		byte crc = in.readByte();
 		byte end = in.readByte();
 		if(expectCrc != crc) {
-			System.out.println("crc 校验失败:"+Integer.toHexString(expectCrc));
+			System.out.println("crc 校验失败:"+Integer.toHexString(expectCrc&0xff));
 		}
 		byte control = data[0];
 		message.setControl(control);
@@ -60,7 +63,7 @@ public class MessageDecoder extends ByteToMessageDecoder {
 		}
 		
 		message.setAddress(new Address(address));
-		message.setPayload(new String(payload,CharsetUtil.UTF_8));
+		message.setPayload(payload);
 		message.setCrc(crc);
 		out.add(message);		
 	}

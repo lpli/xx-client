@@ -180,13 +180,37 @@ public class Crc8Util {
         }
 
     }
+    
+
+    private static final char[] HEX_CHAR = {'0', '1', '2', '3', '4', '5', 
+            '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+    
+    public static String byte2HexString(byte[] data) {
+    	char[] buf = new char[data.length * 2];
+        int a = 0;
+        int index = 0;
+        for(byte b : data) { // 使用除与取余进行转换
+            if(b < 0) {
+                a = 256 + b;
+            } else {
+                a = b;
+            }
+
+            buf[index++] = HEX_CHAR[a / 16];
+            buf[index++] = HEX_CHAR[a % 16];
+        }
+
+        return new String(buf);
+    }
+    
+    public static String byte2HexString(byte data) {
+    	return byte2HexString(new byte[] {data});
+    }
 
     public static void main(String[] args) {
-        String hexStr = "B1782126000102F2";
-        for(byte b:hexString2Bytes(hexStr)) {
-        	System.out.println(b);
-        }
-        System.out.println(Integer.toHexString(0xff&getCrc(hexString2Bytes(hexStr),CrcType.HIGH)));
+        String hexStr = "00786126000102f2";
+        
+        System.out.println(Integer.toHexString(0xff&getCrc(hexString2Bytes(hexStr),CrcType.LOW)));
 
     }
 }
