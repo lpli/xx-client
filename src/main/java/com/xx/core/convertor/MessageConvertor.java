@@ -1,5 +1,7 @@
 package com.xx.core.convertor;
 
+import java.util.List;
+
 import com.xx.core.dto.Message;
 
 /**
@@ -14,12 +16,6 @@ public interface MessageConvertor<T> {
      * @param
      * @return
      */
-    Message toByteMessage(T t);
+    List<Message> toByteMessage(T t);
 
-    /**
-     * 转换为对象消息
-     * @param message
-     * @return
-     */
-    T toObjectMessage(Message message);
 }

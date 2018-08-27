@@ -5,6 +5,7 @@ package com.xx;
 
 import com.xx.core.decoder.MessageDecoder;
 import com.xx.core.dto.Message;
+import com.xx.core.dto.ObjectMessage;
 import com.xx.core.encoder.MessageEncoder;
 import com.xx.handler.ClientHandler;
 
@@ -81,11 +82,12 @@ public class Client {
 		thread.start();
 	}
 
-
-	public void sendMessage(Message message) {
+	public void sendMessage(ObjectMessage message) {
 		if (socketChannel != null) {
-			System.out.println("客户端发送数据："+message.toHexString());
-			socketChannel.writeAndFlush(message);
+			for (Message msg : message.toMessage()) {
+				System.out.println("客户端发送数据：" + msg.toHexString());
+				socketChannel.writeAndFlush(message);
+			}
 		}
 	}
 

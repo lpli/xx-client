@@ -4,8 +4,6 @@ import java.io.Serializable;
 
 import com.xx.util.Crc8Util;
 
-import io.netty.util.CharsetUtil;
-
 /**
  * 消息结构
  * @author lee
@@ -140,7 +138,7 @@ public class Message implements Serializable{
 		builder.append(", address=");
 		builder.append(address);
 		builder.append(", payload=");
-		builder.append(new String(payload,CharsetUtil.UTF_8));
+		builder.append(Crc8Util.byte2HexString(payload));
 		builder.append(", crc=");
 		builder.append(crc);
 		builder.append(", end=");

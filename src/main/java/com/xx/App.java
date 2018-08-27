@@ -3,8 +3,7 @@
  */
 package com.xx;
 
-import com.xx.core.dto.Address;
-import com.xx.core.dto.Message;
+import com.xx.core.dto.RealtimeMessage;
 
 /**
  * @author lee
@@ -16,18 +15,22 @@ public class App {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		Message msg = new Message();
-		msg.setLength((byte) 0x08);
-		msg.setSecStart((byte) 0x68);
-		msg.setControl((byte) 0xb1);
-		msg.setAddress(new Address(new byte[] { 0x78, 0x21, 0x26, 0x00, 0x01 }));
-		msg.setPayload(new byte[] { 0x02, (byte) 0xf2 });
-		msg.setCrc((byte) 0xd7);
 
+		RealtimeMessage msg = new RealtimeMessage();
+		msg.setDirect(1);
+		msg.setDiv(0);
+		msg.setFcb(3);
+		msg.setFunctionCode(1);
+		msg.setProductNo(120);
+		msg.setProductPwd(6);
+		msg.setMonth(7);
+		msg.setYear(18);
+		msg.setStation(1);
+		msg.setChannelNum(2);
+		msg.setData(new float[] { 0, 324 });
 		Client client = new Client("tripnet.unilogger.cn", 10260);
-		//等待启动
-		while(true) {
+		// 等待启动
+		while (true) {
 			try {
 				Thread.sleep(2000L);
 			} catch (InterruptedException e) {
@@ -35,7 +38,6 @@ public class App {
 			}
 			client.sendMessage(msg);
 		}
-		
 
 	}
 
