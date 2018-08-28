@@ -47,10 +47,10 @@ public class Client {
 		super();
 		this.host = host;
 		this.port = port;
-		start();
+		start().sync();
 	}
 
-	private void start() {
+	private Client start() {
 		Thread thread = new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -95,8 +95,12 @@ public class Client {
 			}
 		});
 		thread.start();
+		return this;
 	}
 
+	private void sync() {
+		while(socketChannel == null);
+	}
 	
 	
 	public Message sendMessage(ObjectMessage message,int seconds) throws Exception {
