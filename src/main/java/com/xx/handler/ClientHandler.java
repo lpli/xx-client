@@ -3,10 +3,12 @@
  */
 package com.xx.handler;
 
-import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.logging.Level;
 
+import com.sun.istack.internal.logging.Logger;
 import com.xx.core.dto.Message;
 import com.xx.device.SyncFuture;
+import com.xx.util.Crc8Util;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -20,11 +22,12 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
 
 	private SyncFuture<Message> responseFuture;
 
-	
+	private String clientId;
 
-	public ClientHandler(SyncFuture<Message> responseFuture) {
+	public ClientHandler(SyncFuture<Message> responseFuture, String clientId) {
 		super();
 		this.responseFuture = responseFuture;
+		this.clientId = clientId;
 	}
 
 	@Override
@@ -38,7 +41,8 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
 
 		Message in = (Message) msg;
 		try {
-			System.out.println("客户端接收数据："+in.toHexString());
+			Logger.getLogger(getClass()).log(Level.INFO,
+					String.format("客户端[%s]收到数据：%s", clientId, Crc8Util.formatHexString(in.toHexString())));
 			responseFuture.setResponse(in);
 		} finally {
 			// ByteBuf是一个引用计数对象，这个对象必须显示地调用release()方法来释放
@@ -49,13 +53,14 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
 
 	@Override
 	public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-		System.out.println("通道读取完毕！");
+		Logger.getLogger(getClass()).log(Level.INFO, String.format("客户端[%s]通道读取完毕！", clientId));
 	}
 
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-		if (null != cause)
-			cause.printStackTrace();
+		if (null != cause) {
+			Logger.getLogger(getClass()).log(Level.SEVERE, String.format("客户端[%s]异常！", clientId), cause);
+		}
 		if (null != ctx)
 			ctx.close();
 	}

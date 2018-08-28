@@ -264,11 +264,13 @@ public class Crc8Util {
 
 		return dest;
 	}
+	
+	
 
-	public static void printHexString(String hexStr){
+	public static String formatHexString(String hexStr){
 		if(hexStr.length() % 2 != 0){
 			System.out.println("数据不正确");
-			return;
+			return null;
 		}
 		int splitLen = 2;
 		int n = hexStr.length()/2;
@@ -276,14 +278,14 @@ public class Crc8Util {
 		for(int i=0;i<n;i++){
 			list.add(hexStr.substring(i*splitLen,(i+1)*splitLen));
 		}
-		System.out.println(StringUtils.join(list," "));
+		return StringUtils.join(list," ");
 	}
 
 	public static void main(String[] args) {
 		String hexStr = "00786126000102f2";
 
 		System.out.println(Integer.toHexString(0xff & getCrc(hexString2Bytes(hexStr), CrcType.LOW)));
-		printHexString(byte2HexString(float2byte(324f)));
+		System.out.println(formatHexString(byte2HexString(float2byte(324f))));;
 
 	}
 }
