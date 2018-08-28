@@ -6,11 +6,10 @@
 
 package com.xx.util;
 
-import com.sun.deploy.util.StringUtils;
-
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @Author liliping

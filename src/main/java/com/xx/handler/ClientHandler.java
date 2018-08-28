@@ -3,7 +3,10 @@
  */
 package com.xx.handler;
 
+import java.util.concurrent.ConcurrentLinkedDeque;
+
 import com.xx.core.dto.Message;
+import com.xx.device.SyncFuture;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -15,14 +18,27 @@ import io.netty.util.ReferenceCountUtil;
  */
 public class ClientHandler extends ChannelInboundHandlerAdapter {
 
+	private ConcurrentLinkedDeque<SyncFuture<Message>> responseQueue;
+
+	public ClientHandler(ConcurrentLinkedDeque<SyncFuture<Message>> responseQueue) {
+		this.responseQueue = responseQueue;
+	}
+
+	@Override
+	public void channelActive(ChannelHandlerContext ctx) throws Exception {
+		// 启动后发送心跳数据
+		super.channelActive(ctx);
+	}
+
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 
 		Message in = (Message) msg;
 		try {
-			// Do something with msg
-			System.out.println("客户端收到消息 :" + in.toHexString());
-
+			System.out.println("客户端接收数据："+in.toHexString());
+			SyncFuture<Message> future = new SyncFuture<>();
+			future.setResponse(in);
+			responseQueue.add(future);
 		} finally {
 			// ByteBuf是一个引用计数对象，这个对象必须显示地调用release()方法来释放
 			// or ((ByteBuf)msg).release();

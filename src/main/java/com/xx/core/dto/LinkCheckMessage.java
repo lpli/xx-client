@@ -30,6 +30,7 @@ public class LinkCheckMessage extends ObjectMessage {
 	public List<Message> toMessage() {
 		// 链路检测
 		this.afn = 0x02;
+        this.online = 0xf2;
 		this.content = Crc8Util.byte2HexString((byte) (online & 0xff));
 		return convertor.toByteMessage(this);
 	}

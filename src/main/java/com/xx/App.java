@@ -3,6 +3,8 @@
  */
 package com.xx;
 
+import com.xx.core.dto.LinkCheckMessage;
+import com.xx.core.dto.Message;
 import com.xx.core.dto.RealtimeMessage;
 
 /**
@@ -16,7 +18,7 @@ public class App {
 	 */
 	public static void main(String[] args) {
 
-		RealtimeMessage msg = new RealtimeMessage();
+		LinkCheckMessage msg = new LinkCheckMessage();
 		msg.setDirect(1);
 		msg.setDiv(0);
 		msg.setFcb(3);
@@ -26,17 +28,16 @@ public class App {
 		msg.setMonth(7);
 		msg.setYear(18);
 		msg.setStation(1);
-		msg.setChannelNum(2);
-		msg.setData(new float[] { 0, 324 });
 		Client client = new Client("tripnet.unilogger.cn", 10260);
 		// 等待启动
 		while (true) {
 			try {
 				Thread.sleep(2000L);
-			} catch (InterruptedException e) {
+				Message message = client.sendMessage(msg,3);
+				System.out.println(message.toHexString());
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			client.sendMessage(msg);
 		}
 
 	}

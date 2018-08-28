@@ -3,6 +3,8 @@
  */
 package com.xx.handler;
 
+import com.xx.core.dto.Message;
+
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
@@ -29,8 +31,9 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 		try {
+			Message in = (Message) msg;
 			// Do something with msg
-			System.out.println("server get :" + msg);
+			System.out.println("server get :" + in.toHexString());
 
 		} finally {
 			// ByteBuf是一个引用计数对象，这个对象必须显示地调用release()方法来释放

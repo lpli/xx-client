@@ -3,17 +3,26 @@
  */
 package com.xx;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import com.xx.core.decoder.MessageDecoder;
 import com.xx.core.dto.Message;
 import com.xx.core.dto.ObjectMessage;
 import com.xx.core.encoder.MessageEncoder;
+import com.xx.device.SyncFuture;
 import com.xx.handler.ClientHandler;
-
 import com.xx.util.Crc8Util;
+
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -31,6 +40,8 @@ public class Client {
 	private int port;
 
 	private SocketChannel socketChannel;
+	
+	private ConcurrentLinkedDeque<SyncFuture<Message>> responseQueue = new ConcurrentLinkedDeque<>();
 
 	public Client(String host, int port) {
 		super();
@@ -46,14 +57,15 @@ public class Client {
 				EventLoopGroup eventLoopGroup = new NioEventLoopGroup();
 
 				Bootstrap bootstrap = new Bootstrap();
-				bootstrap.group(eventLoopGroup).channel(NioSocketChannel.class).option(ChannelOption.SO_KEEPALIVE, true)
+				bootstrap.group(eventLoopGroup).channel(NioSocketChannel.class)
+//				.option(ChannelOption.SO_KEEPALIVE, true)
 						.remoteAddress(host, port).handler(new ChannelInitializer<SocketChannel>() {
 							@Override
 							public void initChannel(SocketChannel ch) throws Exception {
 								ChannelPipeline p = ch.pipeline();
 								p.addLast(new MessageDecoder());
 								p.addLast(new MessageEncoder());
-								p.addLast(new ClientHandler());
+								p.addLast(new ClientHandler(responseQueue));
 							}
 						});
 
@@ -85,14 +97,29 @@ public class Client {
 		thread.start();
 	}
 
-	public void sendMessage(ObjectMessage message) {
-		if (socketChannel != null) {
-			for (Message msg : message.toMessage()) {
-				System.out.println("客户端发送数据：" );
-				Crc8Util.printHexString(msg.toHexString());
-				socketChannel.writeAndFlush(message);
-			}
+	
+	
+	public Message sendMessage(ObjectMessage message,int seconds) throws Exception {
+		if (socketChannel == null) {
+			throw new Exception("socket 没打开");
 		}
+		for (Message msg : message.toMessage()) {
+			System.out.println("客户端发送数据：" );
+			Crc8Util.printHexString(msg.toHexString());
+			socketChannel.writeAndFlush(message).addListener(new ChannelFutureListener() {
+				@Override
+				public void operationComplete(ChannelFuture future) throws Exception {
+					if(!future.isSuccess()) {
+					}
+				}
+			});
+		}
+		if(responseQueue.isEmpty()) {
+			return null;
+		}
+		SyncFuture<Message> future = responseQueue.pop();
+		Message msg = future.get(seconds, TimeUnit.SECONDS);
+		return msg;
 	}
 
 	public static void main(String[] args) {
