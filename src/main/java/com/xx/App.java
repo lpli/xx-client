@@ -5,7 +5,6 @@ package com.xx;
 
 import com.xx.core.dto.LinkCheckMessage;
 import com.xx.core.dto.Message;
-import com.xx.core.dto.RealtimeMessage;
 
 /**
  * @author lee
@@ -33,7 +32,7 @@ public class App {
 		while (true) {
 			try {
 				Thread.sleep(2000L);
-				Message message = client.sendMessage(msg,3);
+				Message message = client.sendMessage(msg,6);
 				System.out.println(message.toHexString());
 			} catch (Exception e) {
 				e.printStackTrace();

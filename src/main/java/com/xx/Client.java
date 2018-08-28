@@ -106,16 +106,10 @@ public class Client {
 		for (Message msg : message.toMessage()) {
 			System.out.println("客户端发送数据：" );
 			Crc8Util.printHexString(msg.toHexString());
-			socketChannel.writeAndFlush(message).addListener(new ChannelFutureListener() {
-				@Override
-				public void operationComplete(ChannelFuture future) throws Exception {
-					if(!future.isSuccess()) {
-					}
-				}
-			});
+			socketChannel.writeAndFlush(msg);
 		}
 		if(responseQueue.isEmpty()) {
-			return null;
+			throw new Exception("还没有数据返回");
 		}
 		SyncFuture<Message> future = responseQueue.pop();
 		Message msg = future.get(seconds, TimeUnit.SECONDS);
