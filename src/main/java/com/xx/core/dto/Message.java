@@ -149,7 +149,6 @@ public class Message implements Serializable{
 	
 	public String toHexString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("Message=");
 		builder.append(Crc8Util.byte2HexString(start));
 		builder.append(Crc8Util.byte2HexString(length));
 		builder.append(Crc8Util.byte2HexString(secStart));

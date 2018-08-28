@@ -6,6 +6,12 @@
 
 package com.xx.util;
 
+import com.sun.deploy.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * @Author liliping
  * @Date 2018/8/22
@@ -213,7 +219,8 @@ public class Crc8Util {
 		char[] buf = new char[data.length * 2];
 		int a = 0;
 		int index = 0;
-		for (byte b : data) { // 使用除与取余进行转换
+		for (byte b : data) {
+			// 使用除与取余进行转换
 			if (b < 0) {
 				a = 256 + b;
 			} else {
@@ -223,6 +230,7 @@ public class Crc8Util {
 			buf[index++] = HEX_CHAR[a / 16];
 			buf[index++] = HEX_CHAR[a % 16];
 		}
+
 
 		return new String(buf);
 	}
@@ -258,11 +266,25 @@ public class Crc8Util {
 		return dest;
 	}
 
+	public static void printHexString(String hexStr){
+		if(hexStr.length() % 2 != 0){
+			System.out.println("数据不正确");
+			return;
+		}
+		int splitLen = 2;
+		int n = hexStr.length()/2;
+		List<String> list = new ArrayList<String>(n);
+		for(int i=0;i<n;i++){
+			list.add(hexStr.substring(i*splitLen,(i+1)*splitLen));
+		}
+		System.out.println(StringUtils.join(list," "));
+	}
+
 	public static void main(String[] args) {
 		String hexStr = "00786126000102f2";
 
 		System.out.println(Integer.toHexString(0xff & getCrc(hexString2Bytes(hexStr), CrcType.LOW)));
-		System.out.println(byte2HexString(float2byte(324f)));
+		printHexString(byte2HexString(float2byte(324f)));
 
 	}
 }

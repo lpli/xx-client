@@ -9,6 +9,7 @@ import com.xx.core.dto.ObjectMessage;
 import com.xx.core.encoder.MessageEncoder;
 import com.xx.handler.ClientHandler;
 
+import com.xx.util.Crc8Util;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -65,11 +66,13 @@ public class Client {
 						// 得到管道，便于通信
 						socketChannel = (SocketChannel) future.channel();
 						System.out.println("客户端开启成功...");
+						// 等待客户端链路关闭，就是由于这里会将线程阻塞，导致无法发送信息，所以我这里开了线程
+						socketChannel.closeFuture().sync();
+
 					} else {
 						System.out.println("客户端开启失败...");
 					}
-					// 等待客户端链路关闭，就是由于这里会将线程阻塞，导致无法发送信息，所以我这里开了线程
-					future.channel().closeFuture().sync();
+
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				} finally {
@@ -85,7 +88,8 @@ public class Client {
 	public void sendMessage(ObjectMessage message) {
 		if (socketChannel != null) {
 			for (Message msg : message.toMessage()) {
-				System.out.println("客户端发送数据：" + msg.toHexString());
+				System.out.println("客户端发送数据：" );
+				Crc8Util.printHexString(msg.toHexString());
 				socketChannel.writeAndFlush(message);
 			}
 		}
