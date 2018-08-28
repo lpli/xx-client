@@ -41,7 +41,7 @@ public class Client {
 
 	private SocketChannel socketChannel;
 	
-	private ConcurrentLinkedDeque<SyncFuture<Message>> responseQueue = new ConcurrentLinkedDeque<>();
+	private SyncFuture<Message> responseFuture = new SyncFuture<>();
 
 	public Client(String host, int port) {
 		super();
@@ -65,7 +65,7 @@ public class Client {
 								ChannelPipeline p = ch.pipeline();
 								p.addLast(new MessageDecoder());
 								p.addLast(new MessageEncoder());
-								p.addLast(new ClientHandler(responseQueue));
+								p.addLast(new ClientHandler(responseFuture));
 							}
 						});
 
@@ -108,11 +108,7 @@ public class Client {
 			Crc8Util.printHexString(msg.toHexString());
 			socketChannel.writeAndFlush(msg);
 		}
-		if(responseQueue.isEmpty()) {
-			throw new Exception("还没有数据返回");
-		}
-		SyncFuture<Message> future = responseQueue.pop();
-		Message msg = future.get(seconds, TimeUnit.SECONDS);
+		Message msg = responseFuture.get(seconds, TimeUnit.SECONDS);
 		return msg;
 	}
 

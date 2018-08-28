@@ -18,10 +18,13 @@ import io.netty.util.ReferenceCountUtil;
  */
 public class ClientHandler extends ChannelInboundHandlerAdapter {
 
-	private ConcurrentLinkedDeque<SyncFuture<Message>> responseQueue;
+	private SyncFuture<Message> responseFuture;
 
-	public ClientHandler(ConcurrentLinkedDeque<SyncFuture<Message>> responseQueue) {
-		this.responseQueue = responseQueue;
+	
+
+	public ClientHandler(SyncFuture<Message> responseFuture) {
+		super();
+		this.responseFuture = responseFuture;
 	}
 
 	@Override
@@ -36,9 +39,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
 		Message in = (Message) msg;
 		try {
 			System.out.println("客户端接收数据："+in.toHexString());
-			SyncFuture<Message> future = new SyncFuture<>();
-			future.setResponse(in);
-			responseQueue.add(future);
+			responseFuture.setResponse(in);
 		} finally {
 			// ByteBuf是一个引用计数对象，这个对象必须显示地调用release()方法来释放
 			// or ((ByteBuf)msg).release();
