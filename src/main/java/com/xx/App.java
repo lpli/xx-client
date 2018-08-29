@@ -3,8 +3,8 @@
  */
 package com.xx;
 
-import com.xx.core.dto.LinkCheckMessage;
 import com.xx.core.dto.Message;
+import com.xx.core.dto.RegisterMessage;
 import com.xx.exception.ClientException;
 
 /**
@@ -18,33 +18,27 @@ public class App {
 	 */
 	public static void main(String[] args) {
 
-		LinkCheckMessage msg = new LinkCheckMessage();
-		msg.setDirect(1);
-		msg.setDiv(0);
-		msg.setFcb(3);
-		msg.setFunctionCode(1);
-		msg.setProductNo(120);
-		msg.setProductPwd(6);
-		msg.setMonth(7);
-		msg.setYear(18);
-		msg.setStation(1);
 		try {
-			Client client= new Client("tripnet.unilogger.cn", 10260);
+			Client client = new Client("tripnet.unilogger.cn", 10260, 120, 6, 18, 7, 1, 60);
+			// Thread.sleep(60 * 60 * 1000L);
 			while (true) {
-				try {
-					Thread.sleep(2000L);
-					Message message = client.sendMessage(msg);
-					System.out.println(message.toHexString());
-				} catch (Exception e) {
-					e.printStackTrace();
+				Thread.sleep(3000L);
+				RegisterMessage message = new RegisterMessage();
+				message.setSerial("00000000000000000018621818050001");
+				Message msg = client.sendMessage(message);
+				if(msg!=null) {
+					System.out.println("返回" + msg.toHexString());
 				}
+				
 			}
+
 		} catch (ClientException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		// 等待启动
-		
 
 	}
 

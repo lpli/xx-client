@@ -7,12 +7,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.xx.core.decoder.MessageDecoder;
+import com.xx.core.dto.LinkCheckMessage;
 import com.xx.core.dto.Message;
 import com.xx.core.dto.ObjectMessage;
 import com.xx.core.encoder.MessageEncoder;
 import com.xx.device.SyncFuture;
 import com.xx.exception.ClientException;
 import com.xx.handler.ClientHandler;
+import com.xx.handler.LinkCheckHandler;
 import com.xx.util.CommonUtil;
 import com.xx.util.Crc8Util;
 
@@ -40,7 +42,7 @@ public class Client {
 	public static final int WAIT_SECONDS = 6;
 
 	public enum ClientState {
-		INITIAL(0,"初始化"),RUNNING(1, "运行中"), STOPPED(2, "已停止");
+		INITIAL(0, "初始化"), RUNNING(1, "运行中"), STOPPED(2, "已停止");
 		private int code;
 
 		private String desc;
@@ -66,6 +68,35 @@ public class Client {
 
 	private String clientId;
 
+	/**
+	 * 厂家编码
+	 */
+	private Integer productNo;
+	/**
+	 * 厂家密码
+	 */
+	private Integer productPwd;
+
+	/**
+	 * 生产日期-年
+	 */
+	private Integer year;
+
+	/**
+	 * 生产日期-月
+	 */
+	private Integer month;
+
+	/**
+	 * 测站id
+	 */
+	private Integer station;
+
+	/**
+	 * 连接检测间隔
+	 */
+	private Integer interval;
+
 	private ClientState state = ClientState.INITIAL;
 
 	private SocketChannel socketChannel;
@@ -82,11 +113,39 @@ public class Client {
 		start();
 	}
 
+	public Client(String host, int port, int productNo, int productPwd, int year, int month, int station, int interval)
+			throws ClientException {
+		super();
+		this.clientId = CommonUtil.getLocalMac() + "#" + SEQ.getAndIncrement();
+		this.host = host;
+		this.port = port;
+		this.productNo = productNo;
+		this.productPwd = productPwd;
+		this.year = year;
+		this.month = month;
+		this.station = station;
+		this.interval = interval;
+		start();
+	}
+
 	private void start() {
 		Thread thread = new Thread(new Runnable() {
 			@Override
 			public void run() {
 				Bootstrap bootstrap = new Bootstrap();
+
+				// 心跳数据
+				LinkCheckMessage msg = new LinkCheckMessage();
+				msg.setDirect(1);
+				msg.setDiv(0);
+				msg.setFcb(3);
+				msg.setFunctionCode(1);
+				msg.setProductNo(productNo);
+				msg.setProductPwd(productPwd);
+				msg.setMonth(month);
+				msg.setYear(year);
+				msg.setStation(station);
+
 				bootstrap.group(eventLoopGroup).channel(NioSocketChannel.class)
 						// .option(ChannelOption.SO_KEEPALIVE, true)
 						.remoteAddress(host, port).handler(new ChannelInitializer<SocketChannel>() {
@@ -95,6 +154,7 @@ public class Client {
 								ChannelPipeline p = ch.pipeline();
 								p.addLast(new MessageDecoder());
 								p.addLast(new MessageEncoder());
+								p.addLast(new LinkCheckHandler(clientId, interval, msg));
 								p.addLast(new ClientHandler(responseFuture, clientId));
 							}
 						});
@@ -113,7 +173,7 @@ public class Client {
 						socketChannel.closeFuture().sync();
 
 					} else {
-						log.info( String.format("客户端[%s]开启失败...", clientId));
+						log.info(String.format("客户端[%s]开启失败...", clientId));
 					}
 
 				} catch (InterruptedException e) {
@@ -126,6 +186,8 @@ public class Client {
 
 			}
 		});
+		thread.setName(clientId+"#client");
+		thread.setDaemon(true);
 		thread.start();
 	}
 
@@ -160,6 +222,11 @@ public class Client {
 	}
 
 	public Message sendMessage(ObjectMessage message) throws ClientException {
+		message.setProductNo(productNo);
+		message.setProductPwd(productPwd);
+		message.setYear(year);
+		message.setMonth(month);
+		message.setStation(station);
 		return sendMessage(message, WAIT_SECONDS);
 	}
 
