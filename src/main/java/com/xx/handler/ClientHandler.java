@@ -3,8 +3,6 @@
  */
 package com.xx.handler;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.xx.core.dto.Message;
 import com.xx.device.SyncFuture;
@@ -13,11 +11,15 @@ import com.xx.util.Crc8Util;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * @author lee
  */
 public class ClientHandler extends ChannelInboundHandlerAdapter {
+
+    private static final Log log = LogFactory.getLog(ClientHandler.class);
 
     private SyncFuture<Message> responseFuture;
 
@@ -40,7 +42,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
 
         Message in = (Message) msg;
         try {
-            Logger.getLogger(getClass().getName()).log(Level.INFO,
+            log.info(
                     String.format("客户端[%s]收到数据：%s", clientId, Crc8Util.formatHexString(in.toHexString())));
             responseFuture.setResponse(in);
         } finally {
@@ -52,13 +54,13 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-        Logger.getLogger(getClass().getName()).log(Level.INFO, String.format("客户端[%s]通道读取完毕！", clientId));
+        log.info(String.format("客户端[%s]通道读取完毕！", clientId));
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         if (null != cause) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, String.format("客户端[%s]异常！", clientId), cause);
+            log.info(String.format("客户端[%s]异常！", clientId), cause);
         }
         if (null != ctx) {
             ctx.close();
