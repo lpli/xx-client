@@ -3,9 +3,6 @@
  */
 package com.xx.core.decoder;
 
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 
@@ -16,9 +13,10 @@ import com.xx.util.Crc8Util;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
-import io.netty.util.CharsetUtil;
 
 /**
+ * 
+ * 数据解码器
  * @author lee
  *
  */
@@ -45,7 +43,8 @@ public class MessageDecoder extends ByteToMessageDecoder {
 		in.readBytes(data);
 		byte expectCrc = Crc8Util.getCrc(data, Crc8Util.CrcType.HIGH);
 		byte crc = in.readByte();
-		byte end = in.readByte();
+		//结束标志
+		in.readByte();
 		if(expectCrc != crc) {
 			System.out.println("crc 校验失败:"+Integer.toHexString(expectCrc&0xff));
 		}

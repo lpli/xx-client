@@ -5,8 +5,6 @@ package com.xx.core.dto;
 
 import java.util.List;
 
-import com.xx.util.Crc8Util;
-
 /**
  * @author lee 链路检测报文
  */
