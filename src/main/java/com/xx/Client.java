@@ -6,8 +6,8 @@ package com.xx;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import com.sun.istack.internal.logging.Logger;
 import com.xx.core.decoder.MessageDecoder;
 import com.xx.core.dto.Message;
 import com.xx.core.dto.ObjectMessage;
@@ -105,13 +105,13 @@ public class Client {
 					if (future.isSuccess()) {
 						// 得到管道，便于通信
 						socketChannel = (SocketChannel) future.channel();
-						Logger.getLogger(getClass()).log(Level.INFO, String.format("客户端[%s]开启成功...", clientId));
+						Logger.getLogger(getClass().getName()).log(Level.INFO, String.format("客户端[%s]开启成功...", clientId));
 						state = ClientState.RUNNING;
 						// 等待客户端链路关闭，就是由于这里会将线程阻塞，导致无法发送信息，所以我这里开了线程
 						socketChannel.closeFuture().sync();
 
 					} else {
-						Logger.getLogger(getClass()).log(Level.INFO, String.format("客户端[%s]开启失败...", clientId));
+						Logger.getLogger(getClass().getName()).log(Level.INFO, String.format("客户端[%s]开启失败...", clientId));
 					}
 
 				} catch (InterruptedException e) {
@@ -145,7 +145,7 @@ public class Client {
 			throw new ClientException("客户端未启动");
 		}
 		for (Message msg : message.toMessage()) {
-			Logger.getLogger(getClass()).log(Level.INFO,
+			Logger.getLogger(getClass().getName()).log(Level.INFO,
 					String.format("客户端[%s]发送数据：%s", clientId, Crc8Util.formatHexString(msg.toHexString())));
 			socketChannel.writeAndFlush(msg);
 		}
