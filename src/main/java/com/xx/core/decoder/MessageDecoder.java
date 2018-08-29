@@ -41,13 +41,13 @@ public class MessageDecoder extends ByteToMessageDecoder {
 		
 		byte[] data = new byte[length];
 		in.readBytes(data);
-		byte expectCrc = Crc8Util.getCrc(data, Crc8Util.CrcType.HIGH);
+//		byte expectCrc = Crc8Util.getCrc(data, Crc8Util.CrcType.HIGH);
 		byte crc = in.readByte();
 		//结束标志
 		in.readByte();
-		if(expectCrc != crc) {
+		/*if(expectCrc != crc) {
 			System.out.println("crc 校验失败:"+Integer.toHexString(expectCrc&0xff));
-		}
+		}*/
 		byte control = data[0];
 		message.setControl(control);
 		byte[] address,payload;
