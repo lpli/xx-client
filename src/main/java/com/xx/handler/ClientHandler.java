@@ -3,7 +3,9 @@
  */
 package com.xx.handler;
 
-import com.xx.core.dto.LinkCheckMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.xx.core.dto.Message;
 import com.xx.device.SyncFuture;
 import com.xx.util.Crc8Util;
@@ -11,15 +13,13 @@ import com.xx.util.Crc8Util;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * @author lee
  */
 public class ClientHandler extends ChannelInboundHandlerAdapter {
 
-	private static final Log log = LogFactory.getLog(ClientHandler.class);
+	private static final Logger log = LoggerFactory.getLogger(ClientHandler.class);
 
 	private SyncFuture<Message> responseFuture;
 
@@ -59,7 +59,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 		if (null != cause) {
-			log.info(String.format("客户端[%s]异常！", clientId), cause);
+			log.error(String.format("客户端[%s]异常！", clientId), cause);
 		}
 		if (null != ctx) {
 			ctx.close();

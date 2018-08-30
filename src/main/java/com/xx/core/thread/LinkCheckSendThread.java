@@ -3,8 +3,8 @@
  */
 package com.xx.core.thread;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.xx.core.dto.LinkCheckMessage;
 import com.xx.core.dto.Message;
@@ -18,7 +18,7 @@ import io.netty.channel.Channel;
  */
 public class LinkCheckSendThread implements Runnable {
 	
-	private Log log = LogFactory.getLog(LinkCheckSendThread.class);
+	private Logger log = LoggerFactory.getLogger(LinkCheckSendThread.class);
 	
 	private LinkCheckMessage message;
 	
@@ -31,7 +31,7 @@ public class LinkCheckSendThread implements Runnable {
 	
 	
 
-	public LinkCheckSendThread(LinkCheckMessage message, Channel channel, int interval) {
+	public LinkCheckSendThread(final LinkCheckMessage message,final Channel channel,final int interval) {
 		super();
 		this.message = message;
 		this.channel = channel;

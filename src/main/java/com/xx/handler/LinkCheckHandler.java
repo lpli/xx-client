@@ -1,7 +1,7 @@
 package com.xx.handler;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.xx.core.dto.LinkCheckMessage;
 import com.xx.core.dto.Message;
@@ -21,7 +21,7 @@ import io.netty.util.ReferenceCountUtil;
  */
 public class LinkCheckHandler extends ChannelInboundHandlerAdapter {
 
-	private static final Log log = LogFactory.getLog(LinkCheckHandler.class);
+	private static final Logger log = LoggerFactory.getLogger(LinkCheckHandler.class);
 
 	private String clientId;
 
@@ -37,8 +37,6 @@ public class LinkCheckHandler extends ChannelInboundHandlerAdapter {
 		this.interval = interval;
 		this.message = message;
 	}
-	
-	
 
 	/**
 	 * 通道开启后,发送链路检测帧
@@ -57,14 +55,17 @@ public class LinkCheckHandler extends ChannelInboundHandlerAdapter {
 		Message in = (Message) msg;
 		try {
 			if (!LinkCheckMessage.isLinkCheck(in)) {
-				//不是链路检测数据，转给下个handler
+				// 不是链路检测数据，转给下个handler
 				ctx.fireChannelRead(msg);
 				return;
 			}
-			log.info(String.format("客户端[%s]收到数据：%s", clientId, Crc8Util.formatHexString(in.toHexString())));
+			log.info(String.format("客户端[%s]收到链路检测数据：%s", clientId, Crc8Util.formatHexString(in.toHexString())));
 			if (!LinkCheckMessage.isOnline(in)) {
 				// 返回退出在线,关闭通道
 				ctx.fireExceptionCaught(new ClientException("远程服务返回退出"));
+			} else {
+				//返回保持在线，消息传给注册消息处理器
+				ctx.fireChannelRead(msg);
 			}
 		} finally {
 			// ByteBuf是一个引用计数对象，这个对象必须显示地调用release()方法来释放
@@ -75,13 +76,13 @@ public class LinkCheckHandler extends ChannelInboundHandlerAdapter {
 
 	@Override
 	public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-//		log.info(String.format("客户端[%s]通道读取完毕！", clientId));
+		// log.info(String.format("客户端[%s]通道读取完毕！", clientId));
 	}
 
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 		if (null != cause) {
-			log.info(String.format("客户端[%s]异常！", clientId), cause);
+			log.error(String.format("客户端[%s]异常！", clientId), cause);
 			thread.interrupt();
 		}
 		if (null != ctx) {

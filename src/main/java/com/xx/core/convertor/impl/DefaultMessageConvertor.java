@@ -67,43 +67,9 @@ public class DefaultMessageConvertor implements MessageConvertor<ObjectMessage> 
 		return list;
 	}
 
-	/*@Override
-	public ObjectMessage toObjectMessage(Message message) {
-		ObjectMessage objectMessage = new ObjectMessage();
-		byte control = message.getControl();
-
-		objectMessage.setDirect(control >> 7 & 0x01);
-		objectMessage.setDiv(control >> 6 & 0x01);
-		objectMessage.setFcb(control >> 4 & 0x03);
-		objectMessage.setFunctionCode(control & 0x0f);
-		byte[] addr = message.getAddress().getBytes();
-
-		int productNo = addr[0] & 0x000000ff;
-		int productPwd = (addr[1] & 0x000000f0) >> 4;
-		int month = addr[1] & 0x0000000f;
-		int year = addr[2] & 0x000000ff;
-		int station = (addr[3] & 0x0000ff00) | (addr[4] & 0x000000ff);
-		objectMessage.setProductNo(productNo);
-		objectMessage.setProductPwd(productPwd);
-		objectMessage.setMonth(month);
-		objectMessage.setYear(year);
-		objectMessage.setStation(station);
-		byte[] payload = message.getPayload();
-		objectMessage.setAfn(payload[0]);
-		objectMessage.setContent(Crc8Util.byte2HexString(Arrays.copyOfRange(payload, 1, payload.length)));
-		return objectMessage;
-	}*/
+	
 
 	public static void main(String[] args) {
-		// productNo 120
-
-		// pwd 6
-		// month 1
-		// year 18;
-		// station 1
-		// ctrl 10110001
-		// afn 66H
-		// content 02000000000000a243
 		
 
 

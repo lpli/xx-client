@@ -8,7 +8,6 @@ import java.util.List;
 
 import com.xx.core.dto.Address;
 import com.xx.core.dto.Message;
-import com.xx.util.Crc8Util;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -30,6 +29,7 @@ public class MessageDecoder extends ByteToMessageDecoder {
 		Message message = new Message();
 		in.readByte();
 		byte len = in.readByte();
+		message.setLength(len);
 		int length = (0xff & len);
 		
 		byte secStart = in.readByte();
