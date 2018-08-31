@@ -35,28 +35,31 @@ public class RegisterHandler extends ChannelInboundHandlerAdapter {
 		super();
 		this.clientId = clientId;
 		this.register = register;
-	}
+	};
 
+	/* (non-Javadoc)
+	 * @see io.netty.channel.ChannelInboundHandlerAdapter#channelRead(io.netty.channel.ChannelHandlerContext, java.lang.Object)
+	 */
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 		Message in = (Message) msg;
 		try {
 			if(LinkCheckMessage.isLinkCheck(in)) {
 				if (LinkCheckMessage.isOnline(in) && REG_COUNT.incrementAndGet() <= 1) {
-					// 收到连接检测保持在线返回,且为首次收到
-					for (Message m : register.toMessage()) {
-						log.info(String.format("客户端[%s]发送注册数据：%s", clientId, Crc8Util.formatHexString(m.toHexString())));
-						ctx.channel().writeAndFlush(msg).addListener(new ChannelFutureListener() {
+					Thread registerThread = new Thread(new Runnable() {
 
-							@Override
-							public void operationComplete(ChannelFuture future) throws Exception {
-								if(!future.isSuccess()) {
-									log.error("发送注册信息设备：",future.cause());
-								}
+						@Override
+						public void run() {
+							// 收到连接检测保持在线返回,且为首次收到
+							for (Message m : register.toMessage()) {
+								log.info(String.format("客户端[%s]发送注册数据：%s", clientId, Crc8Util.formatHexString(m.toHexString())));
+								ctx.channel().writeAndFlush(m);
 							}
-							
-						} );
-					}
+						}
+					});
+					registerThread.setDaemon(true);
+					registerThread.start();
+					
 				}
 			}else {
 				log.info(String.format("客户端[%s]收到注册数据：%s", clientId, Crc8Util.formatHexString(in.toHexString())));

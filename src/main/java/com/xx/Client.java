@@ -117,15 +117,14 @@ public class Client {
 	 * 消息future
 	 */
 	private SyncFuture<Message> responseFuture = new SyncFuture<>();
-	
+
 	/**
 	 * 客户端连接future
 	 */
 	private SyncFuture<Boolean> connectFuture = new SyncFuture<>();
 
-
 	public Client(String host, int port, String clientId, Integer productNo, Integer productPwd, Integer year,
-			Integer month, Integer station, Integer interval, String serial)throws ClientException {
+			Integer month, Integer station, Integer interval, String serial) throws ClientException {
 		super();
 		this.host = host;
 		this.port = port;
@@ -147,32 +146,30 @@ public class Client {
 
 				// 心跳数据
 				final LinkCheckMessage msg = new LinkCheckMessage();
-			/*	msg.setDirect(1);
-				msg.setDiv(0);
-				msg.setFcb(3);
-				msg.setFunctionCode(1);*/
+				/*
+				 * msg.setDirect(1); msg.setDiv(0); msg.setFcb(3); msg.setFunctionCode(1);
+				 */
 				msg.setProductNo(productNo);
 				msg.setProductPwd(productPwd);
 				msg.setMonth(month);
 				msg.setYear(year);
 				msg.setStation(station);
-				
-				//设备注册信息
+
+				// 设备注册信息
 				final RegisterMessage message = new RegisterMessage();
 				message.setSerial(serial);
-//				message.setDirect(1);
-//				message.setDiv(0);
-//				message.setFcb(3);
-//				message.setFunctionCode(1);
+				// message.setDirect(1);
+				// message.setDiv(0);
+				// message.setFcb(3);
+				// message.setFunctionCode(1);
 				message.setProductNo(productNo);
 				message.setProductPwd(productPwd);
 				message.setMonth(month);
 				message.setYear(year);
 				message.setStation(station);
-				bootstrap.group(eventLoopGroup).channel(NioSocketChannel.class)
-						.option(ChannelOption.SO_KEEPALIVE, true)
-						.option(ChannelOption.TCP_NODELAY, true)
-						.remoteAddress(host, port).handler(new ChannelInitializer<SocketChannel>() {
+				bootstrap.group(eventLoopGroup).channel(NioSocketChannel.class).option(ChannelOption.SO_KEEPALIVE, true)
+						.option(ChannelOption.TCP_NODELAY, true).remoteAddress(host, port)
+						.handler(new ChannelInitializer<SocketChannel>() {
 							@Override
 							public void initChannel(SocketChannel ch) throws Exception {
 								ChannelPipeline p = ch.pipeline();
@@ -194,7 +191,7 @@ public class Client {
 						socketChannel = (SocketChannel) future.channel();
 						log.info(String.format("客户端[%s]开启成功...", clientId));
 						state = ClientState.RUNNING;
-						//释放连接等待
+						// 释放连接等待
 						connectFuture.setResponse(true);
 						// 等待客户端链路关闭，就是由于这里会将线程阻塞，导致无法发送信息，所以我这里开了线程
 						socketChannel.closeFuture().sync();
@@ -206,8 +203,9 @@ public class Client {
 					e.printStackTrace();
 				} finally {
 					// 优雅地退出，释放相关资源
-					eventLoopGroup.shutdownGracefully();
-					state = ClientState.STOPPED;
+					// eventLoopGroup.shutdownGracefully();
+					// state = ClientState.STOPPED;
+					reConnectServer();
 				}
 
 			}
@@ -216,6 +214,19 @@ public class Client {
 		thread.setDaemon(true);
 		thread.start();
 		return connectFuture.get();
+	}
+
+	/**
+	 * 断线重连
+	 */
+	private void reConnectServer() {
+		try {
+			Thread.sleep(5000);
+			log.info("客户端[{}]断开重连", clientId);
+			connect();
+		} catch (Exception e) {
+			log.error("重连失败",e);
+		}
 	}
 
 	public void shutdown() throws ClientException {

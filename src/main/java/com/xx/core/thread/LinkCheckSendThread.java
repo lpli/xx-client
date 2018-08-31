@@ -11,6 +11,8 @@ import com.xx.core.dto.Message;
 import com.xx.util.Crc8Util;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 
 /**
  * @author lee
@@ -46,8 +48,16 @@ public class LinkCheckSendThread implements Runnable {
 		while(true) {
 			try {
 				for (Message msg : message.toMessage()) {
-					log.info(String.format("发送数据：%s", Crc8Util.formatHexString(msg.toHexString())));
-					this.channel.writeAndFlush(msg);
+					
+					this.channel.writeAndFlush(msg).addListener(new ChannelFutureListener() {
+						
+						@Override
+						public void operationComplete(ChannelFuture future) throws Exception {
+							if(future.isSuccess()) {
+								log.info(String.format("发送数据：%s", Crc8Util.formatHexString(msg.toHexString())));
+							}
+						}
+					});
 				}
 				Thread.sleep(this.interval * 1000L);
 			} catch (InterruptedException e) {
